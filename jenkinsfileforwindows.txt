@@ -1,13 +1,52 @@
-﻿node {
-    stage('build-using-scm'){
-     echo 'build';
+﻿pipeline {
+    agent {
+        label 'Production'
     }
-    
-    stage('test-using-scm'){
-     echo 'test';
+    stages {
+        stage('Build') {            
+            steps {                
+                echo 'Building'            
+            }        
+        }        
+        stage('Test') {            
+            steps {                
+                echo 'Testing'            
+            }        
+        }
+        stage('Deploy - Staging') {            
+            steps {                
+                echo './deploy staging'                
+                echo './run-smoke-tests'            
+            }        
+        }        
+        stage('Sanity check') {            
+            steps {                
+                input "Does the staging environment look ok?"            
+            }        
+        }        
+        stage('Deploy - Production') {            
+            steps {                
+                echo './deploy production'            
+            }        
+        }    
     }
-    
-    stage('deploy-using-scm'){
-     echo 'deploy';
+ 
+    post {        
+        always {            
+            echo 'One way or another, I have finished'            
+            deleteDir() /* clean up our workspace */        
+        }        
+        success {            
+            echo 'I succeeeded!'        
+        }        
+        unstable {            
+            echo 'I am unstable :/'        
+        }        
+        failure {            
+            echo 'I failed :('        
+        }        
+        changed {            
+            echo 'Things were different before...'        
+        }    
     }
 }
